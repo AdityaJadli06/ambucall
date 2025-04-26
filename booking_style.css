@@ -1,0 +1,63 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: url('assets/bookingbg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.booking-container {
+    text-align: center;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    margin-top: 10%;
+}
+
+input {
+    width: calc(100% - 80px);
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#useLocation {
+    width: auto;
+    background-color: #28a745;
+    padding: 10px 15px;
+    margin-left: 5px;
+    display: inline-block;
+}
+#useLocation:hover {
+
+    background-color: #218838;
+
+}
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+h2 {
+    margin-bottom: 20px;
+}

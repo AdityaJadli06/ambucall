@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track Ambulance</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      text-align: center;
+      padding: 20px;
+    }
+    #map {
+      height: 500px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #details {
+      margin-top: 15px;
+      font-size: 16px;
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Track Your Ambulance</h1>
+  <input type="text" id="bookingIdInput" placeholder="Enter Booking ID" />
+  <br>
+  <button id="trackButton">🚑 Track Ambulance</button>
+
+  <div id="details"></div>
+  <div id="map"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC9HFAKmE8J1UcsdDf6mfvKSeTDccdqwkg",
+    authDomain: "ambcall-14461.firebaseapp.com",
+    projectId: "ambcall-14461",
+    storageBucket: "ambcall-14461.appspot.com",
+    messagingSenderId: "978623448666",
+    appId: "1:978623448666:web:790d5f07ee0fb01c74fa63"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let map, userMarker, driverMarker, routeLine;
+
+  // Add event listener properly
+  document.getElementById("trackButton").addEventListener("click", startTracking);
+
+  async function startTracking() {
+    const bookingId = document.getElementById("bookingIdInput").value.trim();
+    if (!bookingId) {
+      alert("Please enter a booking ID.");
+      return;
+    }
+
+    const docRef = doc(db, "bookings", bookingId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      alert("❌ Booking not found. Please check your Booking ID.");
+      return;
+    }
+
+    const bookingData = docSnap.data();
+    document.getElementById("details").innerHTML = `
+      <h3>Booking Details</h3>
+      <p><strong>Hospital Name:</strong> ${bookingData.hospitalName}</p>
+      <p><strong>User Phone:</strong> ${bookingData.userPhoneNumber}</p>
+      <p><strong>Pickup Location:</strong> ${bookingData.coordinates.lat}, ${bookingData.coordinates.lng}</p>
+    `;
+
+    const hospitalLat = bookingData.coordinates.lat;
+    const hospitalLng = bookingData.coordinates.lng;
+
+    if (!map) {
+      map = L.map('map').setView([hospitalLat, hospitalLng], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+    }
+
+    if (userMarker) userMarker.remove();
+    if (driverMarker) driverMarker.remove();
+    if (routeLine) routeLine.remove();
+
+    userMarker = L.marker([hospitalLat, hospitalLng])
+      .addTo(map)
+      .bindPopup("Hospital Location")
+      .openPopup();
+
+    // Watch the driver's live location
+    onSnapshot(docRef, (docSnap) => {
+      const driverLocation = docSnap.data().driverLiveLocation;
+      
+      if (driverLocation?.lat && driverLocation?.lng) {
+        if (!driverMarker) {
+          driverMarker = L.marker([driverLocation.lat, driverLocation.lng])
+            .addTo(map)
+            .bindPopup("Ambulance Location");
+        } else {
+          driverMarker.setLatLng([driverLocation.lat, driverLocation.lng]);
+        }
+
+        // Update route line
+        if (routeLine) routeLine.remove();
+        routeLine = L.polyline(
+          [[driverLocation.lat, driverLocation.lng], [hospitalLat, hospitalLng]],
+          { color: 'blue' }
+        ).addTo(map);
+
+        // Adjust map view
+        map.fitBounds([
+          [driverLocation.lat, driverLocation.lng],
+          [hospitalLat, hospitalLng]
+        ]);
+      }
+    });
+  }
+</script>
+</body>
+</html>

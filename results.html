@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Available Ambulances</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: url('assets/resultbg.jpg') no-repeat center center fixed; /* Replace with your new image */
+        background-size: cover;
+        font-family: Arial, sans-serif;
+        color: white;
+    }
+
+    #map {
+        height: 500px;
+        width: 100%;
+    }
+
+    .results-container {
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 10px;
+    }
+
+    .hospital-list {
+        margin-bottom: 20px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 10px;
+    }
+
+    .hospital-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .hospital-list li {
+        margin: 10px 0;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+    }
+
+    .hospital-list button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .hospital-list button:hover {
+        background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="results-container">
+    <h2>Available Ambulances and Hospitals</h2>
+    <div class="hospital-list">
+      <h3>Top 5 Nearest Hospitals</h3>
+      <ul id="nearestHospitals"></ul>
+    </div>
+    <div id="map"></div>
+    <button onclick="window.location.href='booking.html'" class="btn-secondary">Go Back</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC9HFAKmE8J1UcsdDf6mfvKSeTDccdqwkg",
+      authDomain: "ambcall-14461.firebaseapp.com",
+      projectId: "ambcall-14461",
+      storageBucket: "ambcall-14461.firebasestorage.app",
+      messagingSenderId: "978623448666",
+      appId: "1:978623448666:web:790d5f07ee0fb01c74fa63",
+      measurementId: "G-D0GN8R96HP"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const map = L.map('map').setView([51.505, -0.09], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const redIcon = L.icon({
+      iconUrl: 'assets/map.png',
+      iconSize: [30, 40],
+      iconAnchor: [15, 40],
+      popupAnchor: [0, -35],
+    });
+
+    const blueIcon = L.icon({
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+    });
+
+    const userLatitude = parseFloat(localStorage.getItem("latitude"));
+    const userLongitude = parseFloat(localStorage.getItem("longitude"));
+    const userLocation = localStorage.getItem("location") || "Unknown Location";
+    const userPhone = localStorage.getItem("phoneNumber") || "Not Provided";
+
+    if (userLatitude && userLongitude) {
+      map.setView([userLatitude, userLongitude], 13);
+
+      L.marker([userLatitude, userLongitude], { icon: redIcon })
+        .addTo(map)
+        .bindPopup(`<b>Your Location</b><br>Latitude: ${userLatitude}<br>Longitude: ${userLongitude}`)
+        .openPopup();
+
+      const reverseGeocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLatitude}&lon=${userLongitude}&addressdetails=1`;
+      fetch(reverseGeocodeUrl)
+        .then(res => res.json())
+        .then((data) => {
+          if (data?.address) {
+            const fullAddress = `${data.address.road || ""}, ${data.address.city || ""}, ${data.address.country || ""}`;
+            L.marker([userLatitude, userLongitude], { icon: redIcon })
+              .addTo(map)
+              .bindPopup(`<b>Your Location</b><br>${fullAddress}`)
+              .openPopup();
+          }
+        })
+        .catch(err => console.error("Reverse geocoding failed", err));
+
+      const radius = 10000;
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node[amenity=hospital](around:${radius},${userLatitude},${userLongitude});out;`;
+
+      fetch(overpassUrl)
+        .then(res => res.json())
+        .then((data) => {
+          const hospitals = data.elements
+            .map(h => ({
+              ...h,
+              distance: calculateDistance(userLatitude, userLongitude, h.lat, h.lon)
+            }));
+
+          hospitals.sort((a, b) => a.distance - b.distance);
+          const top5Hospitals = hospitals.slice(0, 5);
+
+          const nearestHospitalsList = document.getElementById("nearestHospitals");
+          nearestHospitalsList.innerHTML = "";
+
+          if (top5Hospitals.length < 5) {
+            console.warn("Not enough hospitals found in the area.");
+          }
+
+          top5Hospitals.forEach((hospital) => {
+            const hospitalName = hospital.tags.name || "Unnamed Hospital";
+            const listItem = document.createElement("li");
+
+            const hospitalInfo = document.createElement("span");
+            hospitalInfo.textContent = `${hospitalName} - ${hospital.distance.toFixed(2)} km`;
+
+            const bookButton = document.createElement("button");
+            bookButton.textContent = "Book";
+
+            bookButton.onclick = async () => {
+              const gmapLink = `https://www.google.com/maps?q=${userLatitude},${userLongitude}`;
+
+              const confirmBooking = confirm(
+                `Do you want to book an ambulance to:\n\n🏥 ${hospitalName}\n📍 ${userLocation}\n📞 ${userPhone}`
+              );
+
+              if (!confirmBooking) {
+                alert("❌ Booking cancelled.");
+                return;
+              }
+
+              try {
+                // Save booking to Firestore
+                await addDoc(collection(db, "bookings"), {
+                  hospitalName: hospitalName,
+                  userPhoneNumber: userPhone,
+                  googleMapLink: gmapLink,
+                  coordinates: {
+                    lat: userLatitude,
+                    lng: userLongitude
+                  },
+                  live: 1,
+                  timestamp: new Date()
+                });
+
+                // WhatsApp Notification
+                const whatsappNumber = "919412965395"; // International format
+                const message = encodeURIComponent(
+                  `🚨 *NEW AMBULANCE BOOKING REQUEST* 🚨\n\n` +
+                  `🏥 *Hospital*: ${hospitalName}\n` +
+                  `📞 *Patient Phone*: ${userPhone}\n` +
+                  `📍 *Location*: ${userLocation}\n` +
+                  `🗺️ *Google Maps*: ${gmapLink}\n\n` +
+                  `*Coordinates*\n` +
+                  `Latitude: ${userLatitude}\n` +
+                  `Longitude: ${userLongitude}\n\n` +
+                  `⚠️ Please respond immediately!`
+                );
+
+                // Open WhatsApp in new tab
+                window.open(
+                  `https://wa.me/${whatsappNumber}?text=${message}`,
+                  '_blank'
+                );
+
+                alert(
+                  `✅ Ambulance Booked!\n\n` +
+                  `🏥 Hospital: ${hospitalName}\n` +
+                  `📞 Phone: ${userPhone}\n` +
+                  `📍 Google Maps: ${gmapLink}`
+                );
+              } catch (error) {
+                console.error("Error saving booking to Firestore:", error);
+                alert("❌ Failed to book ambulance.");
+              }
+            };
+
+            listItem.appendChild(hospitalInfo);
+            listItem.appendChild(bookButton);
+            nearestHospitalsList.appendChild(listItem);
+
+            L.marker([hospital.lat, hospital.lon], { icon: blueIcon })
+              .addTo(map)
+              .bindPopup(`<b>${hospitalName}</b><br>${hospital.distance.toFixed(2)} km`);
+          });
+        })
+        .catch((err) => console.error("Error fetching hospitals:", err));
+    } else {
+      console.error("No user latitude and longitude found in localStorage.");
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+  </script>
+</body>
+</html>

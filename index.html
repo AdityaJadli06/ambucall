@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help on Fingertips</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Global Styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            background: url('assets/frontpg.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column; /* Flexbox for vertical alignment */
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.6); /* Transparent black box */
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Optional: Adds a shadow for better visibility */
+            max-width: 600px;
+            width: 90%; /* Responsive width */
+            margin-left: 5%; /* Position the box towards the left */
+            margin-top: auto; /* Push the container down */
+            margin-bottom: auto; /* Center the container vertically */
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .button {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #6c5ce7, #4e3dbb);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:hover {
+            background: linear-gradient(135deg, #4e3dbb, #6c5ce7);
+            transform: translateY(-8px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.736);
+        }
+
+        .footer {
+            background-color: #6c5ce7; /* Purple hue */
+            color: white;
+            padding: 1rem;
+            width: 100%;
+            text-align: center;
+            margin-top: auto; /* Push the footer to the bottom */
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">HELP ON FINGERTIPS</div>
+        <div class="buttons">
+            <!-- User Login Button -->
+            <button class="button" onclick="location.href='user-login.html'">User Login</button>
+            <!-- Hospital/Staff Login Button -->
+            <button class="button" onclick="location.href='hospital-login.html'">Hospital/Staff Login</button>
+            <!-- Emergency Button -->
+            <button class="button emergency-button" onclick="location.href='emergency.html'">Emergency</button>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <a href="assets/privacy-policies.txt" download="privacy-policies.txt">Privacy Policies</a>
+        <a href="assets/terms-and-conditions.txt" download="terms-and-conditions.txt">Terms and Conditions</a>
+        <a href="assets/contact.txt" download="contact.txt">Contact</a>
+    </footer>
+</body>
+</html>

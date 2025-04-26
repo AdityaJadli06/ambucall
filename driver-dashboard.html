@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Driver Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    h1 { text-align: center; }
+    .booking-card { background: white; border-radius: 10px; padding: 15px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .minimap { height: 200px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    .btn, .accept-btn { display: block; margin: 20px auto 0; padding: 10px 20px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .btn:hover, .accept-btn:hover { background: #0056b3; }
+    .accept-btn.accepted { background-color: #28a745; cursor: default; }
+    .address { font-size: 14px; color: #555; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+<h1>Driver Dashboard</h1>
+<button class="btn" id="refreshBtn">🔄 Refresh Bookings</button>
+<div id="bookingsList">Loading...</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC9HFAKmE8J1UcsdDf6mfvKSeTDccdqwkg",
+    authDomain: "ambcall-14461.firebaseapp.com",
+    projectId: "ambcall-14461",
+    storageBucket: "ambcall-14461.appspot.com",
+    messagingSenderId: "978623448666",
+    appId: "1:978623448666:web:790d5f07ee0fb01c74fa63"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let driverLocation = null;
+  let locationWatcher = null;
+
+  document.getElementById("refreshBtn").addEventListener("click", () => {
+    loadBookings();
+  });
+
+  function getDriverLocation() {
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          err => reject("🚫 Location permission denied.")
+        );
+      } else {
+        reject("⚠️ Geolocation not supported.");
+      }
+    });
+  }
+
+  async function loadBookings() {
+    const list = document.getElementById("bookingsList");
+    list.innerHTML = "Loading bookings...";
+
+    try {
+      driverLocation = await getDriverLocation();
+    } catch (error) {
+      list.innerHTML = `<p style="color:red;">${error}</p>`;
+      return;
+    }
+
+    const q = query(collection(db, "bookings"), where("live", "==", 1));
+    const snapshot = await getDocs(q);
+
+    list.innerHTML = "";
+
+    const bookings = [];
+
+    snapshot.forEach(docSnap => {
+      const booking = docSnap.data();
+      const id = docSnap.id;
+      const coords = booking.coordinates;
+
+      if (coords?.lat && coords?.lng) {
+        const distance = calculateDistance(driverLocation.lat, driverLocation.lng, coords.lat, coords.lng);
+        bookings.push({ id, ...booking, distance });
+      }
+    });
+
+    bookings.sort((a, b) => a.distance - b.distance);
+
+    if (bookings.length === 0) {
+      list.innerHTML = "<p>No live bookings found.</p>";
+      return;
+    }
+
+    bookings.forEach(booking => {
+      const card = document.createElement("div");
+      card.className = "booking-card";
+
+      const accepted = booking.accepted === true;
+
+      card.innerHTML = `
+        <h3>${booking.hospitalName}</h3>
+        <p><strong>Phone:</strong> ${booking.userPhoneNumber}</p>
+        <p><strong>Distance:</strong> ${booking.distance.toFixed(2)} km</p>
+        <p><a href="${booking.googleMapLink}" target="_blank">📍 Google Maps Link</a></p>
+        <p class="address">📍 Getting address...</p>
+        <div class="minimap" id="map-${booking.id}"></div>
+        <button class="accept-btn ${accepted ? 'accepted' : ''}" ${accepted ? 'disabled' : ''}>
+          ${accepted ? 'Accepted ✅' : 'Accept Booking'}
+        </button>
+      `;
+
+      const acceptButton = card.querySelector(".accept-btn");
+      acceptButton.addEventListener("click", () => acceptBooking(booking.id, acceptButton));
+
+      list.appendChild(card);
+
+      // Mini map
+      const mapDiv = card.querySelector(".minimap");
+      const map = L.map(mapDiv).setView([booking.coordinates.lat, booking.coordinates.lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+      L.marker([booking.coordinates.lat, booking.coordinates.lng]).addTo(map);
+
+      // Address
+      const addressP = card.querySelector(".address");
+      const reverseUrl = `https://nominatim.openstreetmap.org/reverse?lat=${booking.coordinates.lat}&lon=${booking.coordinates.lng}&format=json`;
+      fetch(reverseUrl)
+        .then(res => res.json())
+        .then(data => {
+          addressP.textContent = `📍 Address: ${data.display_name || "Not available"}`;
+        })
+        .catch(() => {
+          addressP.textContent = "📍 Address not found";
+        });
+    });
+  }
+
+  async function acceptBooking(bookingId, button) {
+    try {
+      const ref = doc(db, "bookings", bookingId);
+      
+      // Crucial update: Set both accepted and live status
+      await updateDoc(ref, {
+        accepted: true,
+        live: 0  // This deactivates the booking
+      });
+
+      // Redirect to navigation page
+      window.location.href = `driver-navigation.html?bookingId=${bookingId}`;
+
+      if (navigator.geolocation) {
+        if (locationWatcher) navigator.geolocation.clearWatch(locationWatcher);
+
+        locationWatcher = navigator.geolocation.watchPosition(async (pos) => {
+          await updateDoc(ref, {
+            driverLiveLocation: {
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude
+            }
+          });
+          console.log("Driver Live Location Updated!");
+        }, (err) => {
+          console.error("Live location error:", err);
+        }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
+      }
+    } catch (error) {
+      console.error("❌ Accept booking failed:", error);
+      alert("❌ Failed to accept booking.");
+    }
+  }
+
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) ** 2 +
+              Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+              Math.sin(dLon/2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  loadBookings();
+</script>
+
+</body>
+</html>

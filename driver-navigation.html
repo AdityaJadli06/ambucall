@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ambulance Navigation</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+    #map { height: 500px; margin-top: 20px; border-radius: 10px; }
+    .details-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .navigation-controls { margin-top: 20px; display: flex; gap: 10px; }
+    button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    #directions { margin-top: 20px; padding: 15px; background: #fff; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="details-card">
+    <h2>Emergency Details</h2>
+    <p id="hospitalName">Loading...</p>
+    <p id="userPhone">Loading...</p>
+    <p id="address">Loading...</p>
+    <div class="navigation-controls">
+      <button onclick="centerMap()">📍 Center Map</button>
+      <button onclick="handleArrival()">🚑 Mark as Arrived</button>
+    </div>
+  </div>
+  <div id="map"></div>
+  <div id="directions"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+  // Firebase configuration (same as dashboard)
+  const firebaseConfig = {
+    apiKey: "AIzaSyC9HFAKmE8J1UcsdDf6mfvKSeTDccdqwkg",
+    authDomain: "ambcall-14461.firebaseapp.com",
+    projectId: "ambcall-14461",
+    storageBucket: "ambcall-14461.appspot.com",
+    messagingSenderId: "978623448666",
+    appId: "1:978623448666:web:790d5f07ee0fb01c74fa63"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let map, userMarker, driverMarker, routeLine, watchId;
+  const urlParams = new URLSearchParams(window.location.search);
+  const bookingId = urlParams.get('bookingId');
+
+  async function initializeNavigation() {
+    if (!bookingId) {
+      alert("❌ Invalid booking ID");
+      window.location.href = "driver-dashboard.html";
+      return;
+    }
+
+    const bookingRef = doc(db, "bookings", bookingId);
+    
+    // Load booking details
+    onSnapshot(bookingRef, async (docSnap) => {
+      if (!docSnap.exists()) {
+        alert("🚨 Booking not found!");
+        window.location.href = "driver-dashboard.html";
+        return;
+      }
+
+      const booking = docSnap.data();
+      
+      // Update details
+      document.getElementById('hospitalName').textContent = `Hospital: ${booking.hospitalName}`;
+      document.getElementById('userPhone').textContent = `Contact: ${booking.userPhoneNumber}`;
+      document.getElementById('address').textContent = `Address: ${booking.coordinates.address || 'Loading...'}`;
+
+      // Initialize map
+      if (!map) {
+        map = L.map('map').setView(
+          [booking.coordinates.lat, booking.coordinates.lng], 
+          14
+        );
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap'
+        }).addTo(map);
+      }
+
+      // Update user marker
+      if (userMarker) userMarker.remove();
+      userMarker = L.marker([booking.coordinates.lat, booking.coordinates.lng])
+        .addTo(map)
+        .bindPopup("Patient Location");
+
+      // Start tracking driver's location
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+      watchId = navigator.geolocation.watchPosition(
+        async (position) => handleDriverPosition(position, bookingRef, booking),
+        handleLocationError,
+        { enableHighAccuracy: true }
+      );
+    });
+  }
+
+  async function handleDriverPosition(position, bookingRef, booking) {
+    const driverLat = position.coords.latitude;
+    const driverLng = position.coords.longitude;
+
+    // Update driver marker
+    if (driverMarker) {
+      driverMarker.setLatLng([driverLat, driverLng]);
+    } else {
+      driverMarker = L.marker([driverLat, driverLng], {
+        icon: L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+          iconSize: [40, 40]
+        })
+      }).addTo(map).bindPopup("Your Position");
+    }
+
+    // Update Firestore with driver location
+    try {
+      await updateDoc(bookingRef, {
+        driverLiveLocation: { lat: driverLat, lng: driverLng }
+      });
+    } catch (error) {
+      console.error("Firestore update error:", error);
+    }
+
+    // Update route line
+    if (routeLine) routeLine.remove();
+    routeLine = L.polyline(
+      [[driverLat, driverLng], [booking.coordinates.lat, booking.coordinates.lng]],
+      { color: 'red', weight: 3 }
+    ).addTo(map);
+
+    // Update directions
+    updateDirections(driverLat, driverLng, booking.coordinates.lat, booking.coordinates.lng);
+  }
+
+  async function updateDirections(startLat, startLng, endLat, endLng) {
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?steps=true&geometries=geojson`
+      );
+      const data = await response.json();
+      
+      if (data.routes?.[0]) {
+        const steps = data.routes[0].legs[0].steps;
+        let directionsHTML = '<h3>🚦 Turn-by-Turn Directions</h3>';
+        steps.forEach((step, index) => {
+          directionsHTML += `<p>${index + 1}. ${step.maneuver.instruction}</p>`;
+        });
+        document.getElementById('directions').innerHTML = directionsHTML;
+      }
+    } catch (error) {
+      console.error('Directions error:', error);
+    }
+  }
+
+  function centerMap() {
+    if (driverMarker && userMarker) {
+      const bounds = L.latLngBounds([
+        driverMarker.getLatLng(),
+        userMarker.getLatLng()
+      ]);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }
+
+  async function handleArrival() {
+    if (confirm("Confirm arrival at location?")) {
+      try {
+        const bookingRef = doc(db, "bookings", bookingId);
+        await updateDoc(bookingRef, { status: "completed" });
+        navigator.geolocation.clearWatch(watchId);
+        alert("✅ Arrival confirmed! Returning to dashboard...");
+        window.location.href = "driver-dashboard.html";
+      } catch (error) {
+        alert("❌ Error confirming arrival");
+      }
+    }
+  }
+
+  function handleLocationError(error) {
+    alert(`📍 Location Error: ${error.message}`);
+    console.error('Geolocation error:', error);
+  }
+
+  // Initialize navigation when page loads
+  initializeNavigation();
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Sign-Up</title>
+    <script type="module" src="driver-register.js"></script>
+    <link rel="stylesheet" href="signin_style.css">
+</head>
+<body>
+
+    <!-- Back Button -->
+    <button id="backButton" class="back-btn" onclick="window.location.href='hospital-login.html';">←</button>
+
+    <div class="login-container">
+        <h2>Sign up with Email</h2>
+        <form id="emailSignUpForm">
+            <label for="email">Email:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
+            <input type="email" class="em" id="upemail" placeholder="Enter your email" required><br>
+            <label for="password">Password: </label>
+            <input type="password" class="pw" id="uppassword" placeholder="Enter your password" required><br>
+            <button type="submit" id="upsubmit_btn" class="btn">Sign UP</button>
+        </form>
+        <p id="statusMessage"></p>
+    </div>
+
+</body>
+</html>
