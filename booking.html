@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ambulance Booking</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="booking_style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    #coords {
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+
+    .emergency-btn {
+      margin-top: 20px;
+      background-color: #e53935;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .emergency-btn:hover {
+      background-color: #b71c1c;
+    }
+
+    .booking-container {
+      position: relative;
+      padding: 20px;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .back-btn:hover {
+      background-color: #218838;
+    }
+
+    .booking-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 60px;
+    }
+
+    .booking-content h2,
+    .booking-content form,
+    .booking-content p,
+    .booking-content .emergency-btn {
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    form > div {
+      margin-bottom: 15px;
+    }
+
+    input[type="text"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .btn-primary {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="booking-container">
+    <!-- Back Button -->
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+
+    <div class="booking-content">
+      <h2>Book an Ambulance</h2>
+      <form id="bookingForm">
+        <div>
+          <label for="location">Fetch Your Location:</label>
+          <input type="text" id="location" placeholder="Press the Get Location Button" required readonly /><br />
+          <button type="button" id="useLocation">📍 Get My Location</button>
+        </div>
+
+        <div>
+          <label for="phoneNumber">Enter Your Phone Number:</label>
+          <input type="tel" id="phoneNumber" placeholder="e.g., +1234567890" required />
+        </div>
+
+        <button type="submit" class="btn-primary">Submit</button>
+      </form>
+
+      <p id="statusMessage"></p>
+
+      <!-- Emergency First Aid Button -->
+      <button class="emergency-btn" onclick="window.location.href='firstaid.html'">
+        🆘 Emergency First Aid / Basic Life Support
+      </button>
+    </div>
+  </div>
+
+  <div id="map"></div>
+  <div id="coords"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    let map;
+    let marker;
+    let userLat, userLng;
+
+    function getUserLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          showPositionOnMap,
+          showError,
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      } else {
+        alert("Geolocation is not supported by your browser.");
+      }
+    }
+
+    function showPositionOnMap(position) {
+      userLat = position.coords.latitude;
+      userLng = position.coords.longitude;
+
+      const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${userLat}&lon=${userLng}`;
+
+      fetch(geocodeUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.address) {
+            document.getElementById("location").value = data.display_name;
+            statusMessage.textContent = "Location fetched successfully!";
+          } else {
+            statusMessage.textContent = "Unable to fetch address.";
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching address:", error);
+          statusMessage.textContent = "Error fetching address.";
+        });
+
+      if (!map) {
+        map = L.map('map').setView([userLat, userLng], 18);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+      } else {
+        map.setView([userLat, userLng], 18);
+      }
+
+      if (!marker) {
+        marker = L.marker([userLat, userLng], { draggable: true }).addTo(map);
+        marker.on('dragend', function (e) {
+          const pos = marker.getLatLng();
+          updateCoordsDisplay(pos.lat, pos.lng);
+        });
+      } else {
+        marker.setLatLng([userLat, userLng]);
+      }
+
+      updateCoordsDisplay(userLat, userLng);
+    }
+
+    function updateCoordsDisplay(lat, lng) {
+      document.getElementById('coords').innerHTML =
+        `<strong>Latitude:</strong> ${lat.toFixed(6)}<br>
+         <strong>Longitude:</strong> ${lng.toFixed(6)}`;
+    }
+
+    function showError(error) {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          alert("User denied the request for Geolocation.");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          alert("Location information is unavailable.");
+          break;
+        case error.TIMEOUT:
+          alert("The request to get user location timed out.");
+          break;
+        case error.UNKNOWN_ERROR:
+          alert("An unknown error occurred.");
+          break;
+      }
+    }
+
+    document.getElementById("useLocation").addEventListener("click", getUserLocation);
+
+    document.getElementById("bookingForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const location = document.getElementById("location").value.trim();
+      const phoneNumber = document.getElementById("phoneNumber").value.trim();
+
+      if (!location) {
+        statusMessage.textContent = "Please enter your location.";
+        return;
+      }
+
+      if (!phoneNumber) {
+        statusMessage.textContent = "Please enter your phone number.";
+        return;
+      }
+
+      localStorage.setItem("location", location);
+      localStorage.setItem("phoneNumber", phoneNumber);
+      localStorage.setItem("latitude", userLat);
+      localStorage.setItem("longitude", userLng);
+
+      window.location.href = "results.html";
+    });
+  </script>
+</body>
+</html>

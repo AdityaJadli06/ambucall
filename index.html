@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000">
+    <title>Ambulance Booking</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="googlelogin.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Background Section -->
+    <div class="background-section">
+        <h2 class="welcomepage">Welcome to Ambulance Booking 🚑</h2>
+        
+        <!-- Auth Section: Sign in/up options -->
+        <div id="authSection">
+            <button type="submit" id="gsi" class="btn-primary" >Sign in with Google</button>
+            <button id="emailSignIn" class="btn-primary2" onclick="location.href='email-signin.html'">Sign in with Email</button>
+            <button id="emailSignUp" class="btn-secondary" onclick="location.href='email-signup.html'">Sign up with Email</button>
+        </div>
+
+        <!-- Welcome Section: Shows after authentication -->
+        <div id="welcomeSection" style="display: none;">
+            <h3>Welcome, <span id="userName"></span></h3>
+            <button id="signOut" class="btn-secondary">Sign out</button>
+        </div>
+
+        <!-- Booking Section: Main functionality -->
+        <div id="bookingSection" style="display: none;">
+            <h3>Book an Ambulance</h3>
+            <button class="btn-primary" id="bookButton" onclick="location.href='booking.html'">Go to Book Ambulance</button>
+        </div>
+    </div>
+
+ 
+</body>
+</html>
