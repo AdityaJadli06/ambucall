@@ -9,6 +9,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     html, body {
+<<<<<<< HEAD
         margin: 0;
         padding: 0;
         height: 100%;
@@ -67,6 +68,66 @@
 
     .hospital-list button:hover {
         background-color: #0056b3;
+=======
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: url('assets/amb2.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+    }
+
+    .results-container {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+    }
+
+    .hospital-list {
+      margin-bottom: 20px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 10px;
+    }
+
+    .hospital-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .hospital-list li {
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .hospital-list button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .hospital-list button:hover {
+      background-color: #0056b3;
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
     }
   </style>
 </head>
@@ -146,9 +207,17 @@
         })
         .catch(err => console.error("Reverse geocoding failed", err));
 
+<<<<<<< HEAD
       const radius = 10000;
       const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node[amenity=hospital](around:${radius},${userLatitude},${userLongitude});out;`;
 
+=======
+      // Increased the radius to 10 km (10000 meters)
+      const radius = 10000;
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node[amenity=hospital](around:${radius},${userLatitude},${userLongitude});out;`;
+
+      // Removed unwanted keywords filter to show more hospitals
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
       fetch(overpassUrl)
         .then(res => res.json())
         .then((data) => {
@@ -162,7 +231,11 @@
           const top5Hospitals = hospitals.slice(0, 5);
 
           const nearestHospitalsList = document.getElementById("nearestHospitals");
+<<<<<<< HEAD
           nearestHospitalsList.innerHTML = "";
+=======
+          nearestHospitalsList.innerHTML = ""; // Clear existing list
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
 
           if (top5Hospitals.length < 5) {
             console.warn("Not enough hospitals found in the area.");
@@ -191,7 +264,10 @@
               }
 
               try {
+<<<<<<< HEAD
                 // Save booking to Firestore
+=======
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
                 await addDoc(collection(db, "bookings"), {
                   hospitalName: hospitalName,
                   userPhoneNumber: userPhone,
@@ -204,6 +280,7 @@
                   timestamp: new Date()
                 });
 
+<<<<<<< HEAD
                 // WhatsApp Notification
                 const whatsappNumber = "919412965395"; // International format
                 const message = encodeURIComponent(
@@ -224,6 +301,8 @@
                   '_blank'
                 );
 
+=======
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
                 alert(
                   `✅ Ambulance Booked!\n\n` +
                   `🏥 Hospital: ${hospitalName}\n` +
@@ -251,7 +330,11 @@
     }
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
+<<<<<<< HEAD
       const R = 6371;
+=======
+      const R = 6371; // Radius of the Earth in km
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
       const a =
@@ -259,8 +342,16 @@
         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+<<<<<<< HEAD
       return R * c;
     }
   </script>
 </body>
 </html>
+=======
+      return R * c; // Distance in km
+    }
+  </script>
+</body>
+</html>
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e

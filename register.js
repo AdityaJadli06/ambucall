@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 // Your web app's Firebase configuration
+=======
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
 const firebaseConfig = {
   apiKey: "AIzaSyC9HFAKmE8J1UcsdDf6mfvKSeTDccdqwkg",
   authDomain: "ambcall-14461.firebaseapp.com",
@@ -14,6 +20,7 @@ const firebaseConfig = {
   measurementId: "G-D0GN8R96HP"
 };
 
+<<<<<<< HEAD
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
@@ -78,3 +85,30 @@ submit.addEventListener("click", function(event) {
         submit.disabled = false;
     });
 });
+=======
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById("upsubmit_btn").addEventListener("click", async (event) => {
+  event.preventDefault();
+
+  const email = document.getElementById('upemail').value;
+  const password = document.getElementById('uppassword').value;
+  const statusMessage = document.getElementById('statusMessage');
+
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    localStorage.setItem("userEmail", user.email);
+    document.getElementById("authSection").style.display = "none";
+    document.getElementById("welcomeSection").style.display = "block";
+    document.getElementById("bookingSection").style.display = "block";
+    document.getElementById("userName").textContent = user.email;
+  } catch (error) {
+    statusMessage.textContent = "Error creating account. Please try again.";
+    statusMessage.style.color = "red";
+  }
+});
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e

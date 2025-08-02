@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
@@ -7,6 +8,11 @@ import { getAuth, signInWithPopup ,GoogleAuthProvider } from "https://www.gstati
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+=======
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
 const firebaseConfig = {
   apiKey: "AIzaSyC9HFAKmE8J1UcsdDf6mfvKSeTDccdqwkg",
   authDomain: "ambcall-14461.firebaseapp.com",
@@ -17,6 +23,7 @@ const firebaseConfig = {
   measurementId: "G-D0GN8R96HP"
 };
 
+<<<<<<< HEAD
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
@@ -47,3 +54,26 @@ googlelogin.addEventListener("click", function event(){
     // ...
   });
 })
+=======
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+auth.languageCode = 'en';
+const provider = new GoogleAuthProvider();
+
+document.getElementById("gsi").addEventListener("click", () => {
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      return signInWithPopup(auth, provider);
+    })
+    .then((result) => {
+      const user = result.user;
+      document.getElementById("authSection").style.display = "none";
+      document.getElementById("welcomeSection").style.display = "block";
+      document.getElementById("bookingSection").style.display = "block";
+      document.getElementById("userName").textContent = user.displayName || "User";
+    })
+    .catch((error) => {
+      console.error("Error during Google Sign-In:", error);
+    });
+});
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e

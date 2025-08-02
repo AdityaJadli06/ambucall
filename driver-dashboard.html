@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
+<<<<<<< HEAD
     body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
     h1 { text-align: center; }
     .booking-card { background: white; border-radius: 10px; padding: 15px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -15,6 +16,63 @@
     .btn:hover, .accept-btn:hover { background: #0056b3; }
     .accept-btn.accepted { background-color: #28a745; cursor: default; }
     .address { font-size: 14px; color: #555; margin-top: 5px; }
+=======
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .booking-card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 15px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .minimap {
+      height: 200px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .btn, .accept-btn {
+      display: block;
+      margin: 20px auto 0;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn:hover, .accept-btn:hover {
+      background: #0056b3;
+    }
+
+    .accept-btn.accepted {
+      background-color: #28a745;
+      cursor: default;
+    }
+
+    .accept-btn.accepted:hover {
+      background-color: #28a745;
+    }
+
+    .address {
+      font-size: 14px;
+      color: #555;
+      margin-top: 5px;
+    }
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
   </style>
 </head>
 <body>
@@ -25,7 +83,19 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+<<<<<<< HEAD
   import { getFirestore, collection, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+=======
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    where,
+    updateDoc,
+    doc
+  } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
 
   const firebaseConfig = {
     apiKey: "AIzaSyC9HFAKmE8J1UcsdDf6mfvKSeTDccdqwkg",
@@ -33,17 +103,31 @@
     projectId: "ambcall-14461",
     storageBucket: "ambcall-14461.appspot.com",
     messagingSenderId: "978623448666",
+<<<<<<< HEAD
     appId: "1:978623448666:web:790d5f07ee0fb01c74fa63"
+=======
+    appId: "1:978623448666:web:790d5f07ee0fb01c74fa63",
+    measurementId: "G-D0GN8R96HP"
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+<<<<<<< HEAD
   let driverLocation = null;
   let locationWatcher = null;
 
   document.getElementById("refreshBtn").addEventListener("click", () => {
     loadBookings();
+=======
+  let currentDriverLocation = null;
+
+  document.getElementById("refreshBtn").addEventListener("click", () => {
+    if (currentDriverLocation) {
+      loadBookings(currentDriverLocation);
+    }
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
   });
 
   function getDriverLocation() {
@@ -59,6 +143,7 @@
     });
   }
 
+<<<<<<< HEAD
   async function loadBookings() {
     const list = document.getElementById("bookingsList");
     list.innerHTML = "Loading bookings...";
@@ -85,17 +170,42 @@
       if (coords?.lat && coords?.lng) {
         const distance = calculateDistance(driverLocation.lat, driverLocation.lng, coords.lat, coords.lng);
         bookings.push({ id, ...booking, distance });
+=======
+  async function loadBookings(driverLocation) {
+    const list = document.getElementById("bookingsList");
+    list.innerHTML = "Loading bookings...";
+
+    const q = query(collection(db, "bookings"), where("live", "==", 1));
+    const snapshot = await getDocs(q);
+
+    const bookings = [];
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const coords = data.coordinates;
+      if (coords?.lat && coords?.lng) {
+        const distance = calculateDistance(driverLocation.lat, driverLocation.lng, coords.lat, coords.lng);
+        bookings.push({ id: docSnap.id, ...data, distance });
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
       }
     });
 
     bookings.sort((a, b) => a.distance - b.distance);
+<<<<<<< HEAD
+=======
+    list.innerHTML = "";
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
 
     if (bookings.length === 0) {
       list.innerHTML = "<p>No live bookings found.</p>";
       return;
     }
 
+<<<<<<< HEAD
     bookings.forEach(booking => {
+=======
+    for (const booking of bookings) {
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
       const card = document.createElement("div");
       card.className = "booking-card";
 
@@ -107,12 +217,17 @@
         <p><strong>Distance:</strong> ${booking.distance.toFixed(2)} km</p>
         <p><a href="${booking.googleMapLink}" target="_blank">📍 Google Maps Link</a></p>
         <p class="address">📍 Getting address...</p>
+<<<<<<< HEAD
         <div class="minimap" id="map-${booking.id}"></div>
+=======
+        <div class="minimap" id="map-${booking.coordinates.lat}-${booking.coordinates.lng}"></div>
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
         <button class="accept-btn ${accepted ? 'accepted' : ''}" ${accepted ? 'disabled' : ''}>
           ${accepted ? 'Accepted ✅' : 'Accept Booking'}
         </button>
       `;
 
+<<<<<<< HEAD
       const acceptButton = card.querySelector(".accept-btn");
       acceptButton.addEventListener("click", () => acceptBooking(booking.id, acceptButton));
 
@@ -131,10 +246,47 @@
         .then(res => res.json())
         .then(data => {
           addressP.textContent = `📍 Address: ${data.display_name || "Not available"}`;
+=======
+      const btn = card.querySelector(".accept-btn");
+      btn.addEventListener("click", async () => {
+        try {
+          const ref = doc(db, "bookings", booking.id);
+          await updateDoc(ref, { accepted: true });
+          btn.textContent = "Accepted ✅";
+          btn.disabled = true;
+          btn.classList.add("accepted");
+        } catch (err) {
+          alert("❌ Failed to accept booking.");
+          console.error(err);
+        }
+      });
+
+      list.appendChild(card);
+
+      // Mini Map
+      const map = L.map(card.querySelector(".minimap")).setView(
+        [booking.coordinates.lat, booking.coordinates.lng],
+        15
+      );
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+      L.marker([booking.coordinates.lat, booking.coordinates.lng]).addTo(map);
+
+      // Address fetch
+      const addressP = card.querySelector(".address");
+      const reverseUrl = `https://nominatim.openstreetmap.org/reverse?lat=${booking.coordinates.lat}&lon=${booking.coordinates.lng}&format=json`;
+
+      fetch(reverseUrl)
+        .then(res => res.json())
+        .then(data => {
+          addressP.textContent = `📍 Address: ${data?.display_name || "Not available"}`;
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
         })
         .catch(() => {
           addressP.textContent = "📍 Address not found";
         });
+<<<<<<< HEAD
     });
   }
 
@@ -169,6 +321,8 @@
     } catch (error) {
       console.error("❌ Accept booking failed:", error);
       alert("❌ Failed to accept booking.");
+=======
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
     }
   }
 
@@ -176,6 +330,7 @@
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
+<<<<<<< HEAD
     const a = Math.sin(dLat/2) ** 2 +
               Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
               Math.sin(dLon/2) ** 2;
@@ -188,3 +343,33 @@
 
 </body>
 </html>
+=======
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function showError(message) {
+    document.getElementById("bookingsList").innerHTML = `<p style="color:red">${message}</p>`;
+  }
+
+  // Initial load
+  getDriverLocation()
+    .then(loc => {
+      currentDriverLocation = loc;
+      loadBookings(loc);
+
+      // Auto refresh every 30 seconds
+      setInterval(() => {
+        if (currentDriverLocation) {
+          loadBookings(currentDriverLocation);
+        }
+      }, 30000);
+    })
+    .catch(showError);
+</script>
+</body>
+</html>
+>>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
