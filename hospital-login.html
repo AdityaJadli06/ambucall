@@ -9,10 +9,6 @@
     <title>Hospital/Staff Login</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="styles.css">
-<<<<<<< HEAD
-=======
-    <script type="module" src="googlelogin.js"></script>
->>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -21,85 +17,11 @@
     <div class="background-section">
         <h2 class="welcomepage">Welcome to Hospital/Staff Portal 🏥</h2>
         
-<<<<<<< HEAD
         <!-- Auth Section: Sign in option -->
         <div id="authSection">
             <button id="emailSignIn" class="btn-primary2" onclick="location.href='driver-signin.html'">Sign in with Email</button>
         </div>
     </div>
 
-=======
-        <!-- Auth Section: Sign in/up options -->
-        <div id="authSection">
-            <button type="submit" id="gsi" class="btn-primary">Sign in with Google</button>
-            <button id="emailSignIn" class="btn-primary2" onclick="location.href='email-signin.html'">Sign in with Email</button>
-            <button id="emailSignUp" class="btn-secondary" onclick="location.href='email-signup.html'">Sign up with Email</button>
-        </div>
-
-        <!-- Welcome Section: Shows after authentication -->
-        <div id="welcomeSection" style="display: none;">
-            <h3>Welcome, <span id="userName"></span></h3>
-            <button id="signOut" class="btn-secondary">Sign out</button>
-        </div>
-
-        <!-- Dashboard Section: Main functionality -->
-        <div id="dashboardSection" style="display: none;">
-            <h3>Hospital Dashboard</h3>
-            <button class="btn-primary" id="dashboardButton">Go to Dashboard</button>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyC9HFAKmE8J1UcsdDf6mfvKSeTDccdqwkg",
-            authDomain: "ambcall-14461.firebaseapp.com",
-            projectId: "ambcall-14461",
-            storageBucket: "ambcall-14461.firebasestorage.app",
-            messagingSenderId: "978623448666",
-            appId: "1:978623448666:web:790d5f07ee0fb01c74fa63",
-            measurementId: "G-D0GN8R96HP"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // Handle authentication state changes
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById("authSection").style.display = "none";
-                document.getElementById("welcomeSection").style.display = "block";
-                document.getElementById("dashboardSection").style.display = "block";
-                document.getElementById("userName").textContent = user.displayName || user.email || "User";
-            } else {
-                document.getElementById("authSection").style.display = "block";
-                document.getElementById("welcomeSection").style.display = "none";
-                document.getElementById("dashboardSection").style.display = "none";
-            }
-        });
-
-        // Handle "Go to Dashboard" button click
-        document.getElementById("dashboardButton").addEventListener("click", () => {
-            window.location.href = "driver-dashboard.html";
-        });
-
-        // Handle sign-out
-        document.getElementById("signOut").addEventListener("click", () => {
-            signOut(auth)
-                .then(() => {
-                    // Clear local storage and reload the page
-                    localStorage.clear();
-                    location.reload();
-                })
-                .catch((error) => {
-                    console.error("Error during sign-out:", error);
-                });
-        });
-    </script>
->>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
 </body>
 </html>
