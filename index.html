@@ -6,31 +6,116 @@
     <title>Help on Fingertips</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* Global Styles */
-        body, html {
+        html, body {
             margin: 0;
             padding: 0;
-            height: 100%;
             font-family: 'Poppins', sans-serif;
-            background: url('assets/frontpg.jpeg') no-repeat center center fixed;
+            min-height: 100vh;
+            background: #eaeaea;
+        }
+
+        .hero-section {
+            width: 100%;
+            min-height: 60vh;
+            background: url('assets/frontpg.jpg') center center no-repeat;
             background-size: cover;
+            background-color: #eaeaea;
             display: flex;
-            flex-direction: column; /* Flexbox for vertical alignment */
+            position: relative;
         }
 
-        .container {
-            background: rgba(0, 0, 0, 0.6); /* Transparent black box */
-            padding: 2rem;
+        .top-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #ffe066;
+            padding: 0.7rem 1.5rem;
+            border-bottom-right-radius: 20px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            z-index: 20;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .top-strip a {
+            color: #333;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: text-decoration 0.2s;
+        }
+
+        .top-strip a:hover {
+            text-decoration: underline;
+        }
+
+        .advice-btn {
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            color: #333;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1.2rem;
+            font-size: 1.1rem;
+            margin-left: 1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .advice-btn:hover {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            transform: scale(1.08);
+        }
+
+        .login-strip {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: auto;
+            background: #ffe066;
+            padding: 0.7rem 1.5rem;
+            border-bottom-left-radius: 20px;
+            display: flex;
+            gap: 1rem;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .login-strip .strip-btn {
+            background: transparent;
+            border: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+
+        .login-strip .strip-btn:hover {
+            background: #fffbe6;
+        }
+
+        .login-box {
+            position: absolute;
+            left: 40px;
+            bottom: 80px;
+            background: rgba(0,0,0,0.7);
+            padding: 2rem 1.5rem;
             border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Optional: Adds a shadow for better visibility */
-            max-width: 600px;
-            width: 90%; /* Responsive width */
-            margin-left: 5%; /* Position the box towards the left */
-            margin-top: auto; /* Push the container down */
-            margin-bottom: auto; /* Center the container vertically */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            max-width: 350px;
+            width: 80vw;
+            min-width: 220px;
+            text-align: center;
+            z-index: 2;
+            transition: max-width 0.3s, padding 0.3s, width 0.3s;
         }
 
-        .title {
+        .login-box .title {
             font-size: 2rem;
             font-weight: 600;
             color: white;
@@ -41,66 +126,206 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            align-items: center;
         }
 
         .button {
             padding: 1rem 2rem;
             font-size: 1.2rem;
             color: white;
-            background: linear-gradient(135deg, #6c5ce7, #4e3dbb);
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             border: none;
             border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
         }
 
         .button:hover {
-            background: linear-gradient(135deg, #4e3dbb, #6c5ce7);
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
             transform: translateY(-8px);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.736);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.736);
         }
 
-        .footer {
-            background-color: #6c5ce7; /* Purple hue */
-            color: white;
-            padding: 1rem;
+        .info-sheet {
             width: 100%;
-            text-align: center;
-            margin-top: auto; /* Push the footer to the bottom */
+            background: #fff;
+            border-radius: 0;
+            box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+            margin-top: -40px;
+            padding: 3rem 1.5rem 2rem 1.5rem;
+            min-height: 120vh;
+            z-index: 3;
+            position: relative;
         }
 
-        .footer a {
-            color: white;
-            text-decoration: none;
-            margin: 0 1rem;
-            font-weight: 600;
-        }
+        @media (max-width: 900px) {
+    .login-box {
+        left: 2vw;
+        bottom: 40px;
+        max-width: 90vw;
+        width: 90vw;
+        padding: 1.2em 0.7em;
+    }
+    .info-sheet {
+        padding: 2em 0.7em 1em 0.7em;
+    }
+}
 
-        .footer a:hover {
-            text-decoration: underline;
-        }
+@media (max-width: 600px) {
+    html, body {
+        overflow-x: hidden;
+    }
+    .hero-section {
+        min-height: 50vh;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .top-strip, .login-strip {
+        position: static;
+        width: 100vw;
+        border-radius: 0;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        padding: 0.5em 0.5em;
+        font-size: 0.95em;
+        box-sizing: border-box;
+    }
+    .top-strip {
+        margin-bottom: 0.5em;
+    }
+    .login-strip {
+        margin-bottom: 1em;
+    }
+    .login-box {
+        position: static;
+        left: unset;
+        right: unset;
+        bottom: unset;
+        margin: 1em auto 0 auto;
+        max-width: 98vw;
+        width: 98vw;
+        min-width: 0;
+        padding: 0.7em 0.3em;
+        box-sizing: border-box;
+    }
+    .button {
+        font-size: 1em;
+        padding: 0.8em 0.5em;
+        max-width: 98vw;
+    }
+    .info-sheet {
+        padding: 1em 0.3em 1em 0.3em;
+        min-height: 80vh;
+    }
+    .website-working {
+        padding: 1em 0.3em;
+        font-size: 0.98em;
+    }
+    h2 {
+        font-size: 1.3em !important;
+    }
+}
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="title">HELP ON FINGERTIPS</div>
-        <div class="buttons">
-            <!-- User Login Button -->
-            <button class="button" onclick="location.href='user-login.html'">User Login</button>
-            <!-- Hospital/Staff Login Button -->
-            <button class="button" onclick="location.href='hospital-login.html'">Hospital/Staff Login</button>
-            <!-- Emergency Button -->
-            <button class="button emergency-button" onclick="location.href='emergency.html'">Emergency</button>
+    <div class="hero-section">
+        <div class="top-strip">
+            <a href="assets/privacy-policies.txt" download="privacy-policies.txt">Privacy Policies</a>
+            <a href="assets/terms-and-conditions.txt" download="terms-and-conditions.txt">Terms and Conditions</a>
+            <a href="assets/contact.txt" download="contact.txt">Contact</a>
+            <!-- Emergency Advice Button -->
+            <button class="advice-btn" onclick="location.href='firstaid.html'">Emergency Advice</button>
+        </div>
+        <div class="login-strip">
+            <button class="strip-btn" onclick="location.href='user-login.html'">User Login</button>
+            <button class="strip-btn" onclick="location.href='hospital-login.html'">Hospital/Staff Login</button>
+        </div>
+        <div class="login-box">
+            <div class="title">HELP ON FINGERTIPS</div>
+            <div class="buttons">
+                <button class="button" onclick="location.href='emergency.html'">Emergency</button>
+            </div>
         </div>
     </div>
 
-    <!-- Footer Section -->
-    <footer class="footer">
-        <a href="assets/privacy-policies.txt" download="privacy-policies.txt">Privacy Policies</a>
-        <a href="assets/terms-and-conditions.txt" download="terms-and-conditions.txt">Terms and Conditions</a>
-        <a href="assets/contact.txt" download="contact.txt">Contact</a>
-    </footer>
+    <div class="info-sheet">
+        <h2 style="color:#6c5ce7; font-size:2.2rem; margin-bottom:0.5rem;">Meet Aditya Jadli</h2>
+        <p style="font-size:1.15rem; color:#222; margin-bottom:1.2rem;">
+            <span style="font-size:1.3rem; font-weight:600;">🚀 Computer Science Enthusiast | Software Developer | Tech Explorer</span>
+        </p>
+        <p style="font-size:1.1rem; color:#444;">
+            Hi, I’m <span style="color:#e74c3c; font-weight:600;">Aditya Jadli</span>, currently pursuing Computer Science Engineering at <span style="color:#4e3dbb; font-weight:600;">Graphic Era Hill University</span>. My journey is fueled by a passion for building impactful software and solving real-world problems with technology.
+        </p>
+        <div style="margin:1.5rem 0;">
+            <span style="font-size:1.1rem; font-weight:600; color:#6c5ce7;">💡 What I Do:</span>
+            <ul style="margin:0.7rem 0 0 1.5rem; color:#333; font-size:1.05rem;">
+                <li>Develop <span style="color:#e67e22; font-weight:600;">Web Applications</span> like <b>Ambulance Booking System</b></li>
+                <li>Design <span style="color:#27ae60; font-weight:600;">Structured Systems in C</span> (e.g., Crop Monitoring System)</li>
+                <li>Integrate <span style="color:#16a085; font-weight:600;">Firebase</span> for seamless connectivity</li>
+            </ul>
+        </div>
+        <div style="margin:1.5rem 0;">
+            <span style="font-size:1.1rem; font-weight:600; color:#6c5ce7;">🛠️ Tech Stack:</span>
+            <ul style="margin:0.7rem 0 0 1.5rem; color:#333; font-size:1.05rem;">
+                <li>C Programming (File Handling, System Design)</li>
+                <li>Python</li>
+                <li>HTML &amp; CSS</li>
+                <li>Firebase Integration</li>
+                <li>Frontend-Backend Connectivity</li>
+            </ul>
+        </div>
+        <div style="margin:1.5rem 0;">
+            <span style="font-size:1.1rem; font-weight:600; color:#6c5ce7;">📚 Currently Leveling Up In:</span>
+            <ul style="margin:0.7rem 0 0 1.5rem; color:#333; font-size:1.05rem;">
+                <li>Advanced C Programming</li>
+                <li>Data Structures &amp; Algorithms (DSA)</li>
+                <li>Full-Stack Web Development</li>
+            </ul>
+        </div>
+        <p style="font-size:1.1rem; color:#444; margin-top:1.5rem;">
+            <span style="font-weight:600; color:#e74c3c;">My Mission:</span> To become a <span style="color:#4e3dbb; font-weight:600;">proficient software engineer</span> who delivers scalable tech products that make a real-world impact.
+        </p>
+        <p style="font-size:1.1rem; color:#444; margin-top:1.2rem;">
+            <span style="font-weight:600; color:#6c5ce7;">Let’s Connect!</span> I’m always open to learning, collaborating, and exploring new opportunities beyond the classroom.
+        </p>
+        <!-- How Our Website Works Section -->
+        <div class="website-working" style="margin-top:2.5rem; background:linear-gradient(135deg,#f3e9ff 60%,#fff 100%); border-radius:18px; box-shadow:0 2px 12px rgba(108,92,231,0.08); padding:2rem 1.5rem;">
+            <h2 style="color:#e74c3c; font-size:2rem; margin-bottom:0.7rem;">🚑 How Our Website Works</h2>
+            <p style="font-size:1.12rem; color:#222; margin-bottom:1.2rem;">
+                Our platform is designed for <span style="color:#6c5ce7; font-weight:600;">quick and accessible ambulance booking</span> during emergencies.
+                <br>
+                <span style="color:#e67e22; font-weight:600;">No time to log in?</span> Just click the <b>Emergency</b> button for instant guidance!
+            </p>
+            <ul style="font-size:1.08rem; color:#333; margin-left:1.5rem; margin-bottom:1.2rem;">
+                <li>
+                    <span style="color:#4e3dbb; font-weight:600;">User Login:</span> For regular users, access the User Login section.
+                </li>
+                <li>
+                    <span style="color:#4e3dbb; font-weight:600;">Hospital/Staff Login:</span> Medical professionals and hospital staff can log in for advanced features.
+                </li>
+            </ul>
+            <p style="font-size:1.08rem; color:#444; margin-bottom:1.2rem;">
+                <span style="color:#6c5ce7; font-weight:600;">Sign in with Google, Email, or create a new account.</span> Once authenticated:
+            </p>
+            <ol style="font-size:1.08rem; color:#333; margin-left:1.5rem; margin-bottom:1.2rem;">
+                <li>Click <b>Get My Location</b> and allow location access.</li>
+                <li>Enter your phone number and click <b>Submit</b>.</li>
+                <li>The system shows the <span style="color:#e74c3c; font-weight:600;">top 5 nearest hospitals</span> based on your location.</li>
+                <li>Book an ambulance by clicking <b>Book</b> next to your preferred hospital—this will redirect you to the ambulance driver's WhatsApp for direct communication.</li>
+            </ol>
+            <div style="background:#fffbe6; border-radius:12px; padding:1rem 1rem; margin-top:1.2rem; box-shadow:0 1px 6px rgba(230,126,34,0.07);">
+                <span style="font-size:1.15rem; color:#e67e22; font-weight:600;">🆘 Emergency Info:</span>
+                <p style="margin:0.5rem 0 0 0; color:#333;">
+                    In critical situations, visit our <b>Emergency Info</b> section to learn how to respond to conditions like heat stroke, cardiac issues, and other life-threatening events while you wait for medical help.
+                </p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
