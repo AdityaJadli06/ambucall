@@ -2,11 +2,7 @@ html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-<<<<<<< HEAD
     background: url('assets/bookingbg.jpg') no-repeat center center fixed;
-=======
-    background: url('assets/ambulance-bg.jpg') no-repeat center center fixed;
->>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
     background-size: cover;
     font-family: Arial, sans-serif;
     color: white;
@@ -64,7 +60,6 @@ label {
 
 h2 {
     margin-bottom: 20px;
-<<<<<<< HEAD
 }
 
 @media (max-width: 600px) {
@@ -81,6 +76,4 @@ h2 {
         font-size: 0.95em;
         padding: 8px 10px;
     }
-=======
->>>>>>> 58a6da993c2ec4995d358e0f8c2d41267197745e
 }
